@@ -1,33 +1,26 @@
 <?php
 
 
-$username = 'bob';
-$conn = mysqli_connect('localhost', 'root', '', 'sql_injection');
+$conn = mysqli_connect('localhost', 'root', '', 'prepare_stmt_db');
 
-$sql = "SELECT * FROM users WHERE username = '$username' OR '1'='1' ";
+$stmt = mysqli_prepare( $conn, "INSERT INTO users(username,email,password,reg_date) VALUES(?,?,?,?)");
 
-$result = mysqli_query($conn, $sql);
+if($stmt) {
+    $username = 'Ayomide Eliza';
+    $email = 'ayomide@gmail.com';
+    $password = '123';
+    $reg_date = date('Y-m-d');
 
-//avoid sql injection with prepare stmts
 
-$sql_prepare = "SELECT * FROM users WHERE username =?";
+mysqli_stmt_bind_param($stmt, "ssss", $username,$email,$password,$reg_date);
 
-$stmt = mysqli_prepare($conn, $sql_prepare);
+mysqli_execute($stmt);
 
-//bind the param
-mysqli_stmt_bind_param($stmt, "s", $username);
+echo "New user created successfully";
 
-//execute
-mysqli_stmt_execute($stmt);
+mysqli_stmt_close($stmt);
+} else{
+    echo "Error" . mysqli_error($error) ;
+}
 
-$result = mysqli_stmt_get_result($stmt);
 
-?>
-
-<ul>
-    <?php while ($user = mysqli_fetch_assoc($result)): ?>
-
-        <li><?php echo $user['username']; ?></li>
-
-    <?php endwhile; ?>
-</ul>
